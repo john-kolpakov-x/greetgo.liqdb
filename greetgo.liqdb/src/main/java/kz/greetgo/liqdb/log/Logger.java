@@ -3,15 +3,15 @@ package kz.greetgo.liqdb.log;
 import kz.greetgo.liqdb.Changelog;
 
 public interface Logger {
-  void executionTime(long millisPeriod, Changelog change);
+  void changelogApplyOk(long millisPeriod, Changelog changelog);
   
-  void executionError(long millisPeriod, Changelog change, Throwable error);
+  void changelogApplyError(long millisPeriod, Changelog changelog, Throwable error);
   
-  void disastrousLock(String changesetLockTableName);
+  void cannotLock(String changesetLockTableName);
   
   void successLock(String changesetLockTableName);
   
   void successUnlock(String changesetLockTableName);
   
-  void disastrousUnlock(String changesetLockTableName, Throwable e);
+  void cannotUnlock(String changesetLockTableName, Throwable e);
 }

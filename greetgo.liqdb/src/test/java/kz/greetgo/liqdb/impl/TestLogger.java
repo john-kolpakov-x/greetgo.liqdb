@@ -1,7 +1,9 @@
 package kz.greetgo.liqdb.impl;
 
 import java.io.PrintStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import kz.greetgo.liqdb.Changelog;
@@ -18,26 +20,47 @@ public class TestLogger implements Logger {
   public final List<String> list = new ArrayList<>();
   
   @Override
-  public void executionTime(long millisPeriod, Changelog change) {
-    list.add(pr("executionTime: millis " + millisPeriod + ", changelog " + change.identityInfo()));
+  public void changelogApplyOk(long millisPeriod, Changelog change) {
+    list.add(pr("changelogApplyOk: millis " + millisPeriod + ", changelog " + change.identityInfo()));
   }
   
   @Override
-  public void executionError(long millisPeriod, Changelog change, Throwable error) {
-    list.add(pr("executionError: millis " + millisPeriod + ", changelog " + change.identityInfo()
-        + ", errorClass " + error.getClass().getSimpleName() + ", errorMessage "
-        + error.getMessage()));
+  public void changelogApplyError(long millisPeriod, Changelog change, Throwable error) {
+    list.add(pr("changelogApplyError: millis " + millisPeriod + ", changelog "
+        + change.identityInfo() + ", errorClass " + error.getClass().getSimpleName()
+        + ", errorMessage " + error.getMessage()));
     
   }
   
-  private String pr(String message) {
-    if (out != null) out.println(message);
+  static class PR {
+    final String threadName;
+    final Date prDate;
+    final String message;
+    
+    public PR(String threadName, Date prDate, String message) {
+      this.threadName = threadName;
+      this.prDate = prDate;
+      this.message = message;
+    }
+    
+    @Override
+    public String toString() {
+      SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.SSS");
+      return sdf.format(prDate) + ' ' + threadName + ' ' + message;
+    }
+  }
+  
+  private String pr(final String message) {
+    if (out != null) {
+      out.println(new PR(Thread.currentThread().getName(), new Date(), message).toString());
+    }
     return message;
   }
   
   @Override
-  public void disastrousLock(String changesetLockTableName) {
-    list.add(pr("disastrousLock " + changesetLockTableName));
+  public void cannotLock(String changesetLockTableName) {
+    String threadName = Thread.currentThread().getName();
+    list.add(pr("cannotLock " + changesetLockTableName + ", thread = " + threadName));
   }
   
   @Override
@@ -51,7 +74,7 @@ public class TestLogger implements Logger {
   }
   
   @Override
-  public void disastrousUnlock(String changesetLockTableName, Throwable e) {
-    list.add(pr("disastrousUnlock " + changesetLockTableName + ", err = " + e.getMessage()));
+  public void cannotUnlock(String changesetLockTableName, Throwable e) {
+    list.add(pr("cannotUnlock " + changesetLockTableName + ", err = " + e.getMessage()));
   }
 }

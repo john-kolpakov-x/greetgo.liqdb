@@ -28,17 +28,18 @@ public class ChangeApplyer {
     long startedAt = System.currentTimeMillis();
     try {
       changelog.apply(con);
-      logger.executionTime(System.currentTimeMillis() - startedAt, changelog);
+      logger.changelogApplyOk(System.currentTimeMillis() - startedAt, changelog);
       saveChangelogExecution(changelog);
     } catch (Exception e) {
-      logger.executionError(System.currentTimeMillis() - startedAt, changelog, e);
+      logger.changelogApplyError(System.currentTimeMillis() - startedAt, changelog, e);
       throw e;
     }
   }
   
   public void lockingApplyChangelogList(List<Changelog> changelogList) throws Exception {
+    
     while (!tryLock()) {
-      logger.disastrousLock(config.changesetLockTableName());
+      logger.cannotLock(config.changesetLockTableName());
       Thread.sleep(1000);
     }
     
@@ -53,7 +54,7 @@ public class ChangeApplyer {
         unlock();
         logger.successUnlock(config.changesetLockTableName());
       } catch (Throwable e) {
-        logger.disastrousUnlock(config.changesetLockTableName(), e);
+        logger.cannotUnlock(config.changesetLockTableName(), e);
         throw e;
       }
       
@@ -64,11 +65,21 @@ public class ChangeApplyer {
     executeSql("insert into " + config.changesetLockTableName() + " values (0)");
   }
   
-  private boolean tryLock() throws SQLException {
+  private boolean tryLock() throws Exception {
+    prepareChangelogTables();
+    
     con.setAutoCommit(false);
     try {
-      executeSql("start transaction read write, isolation level serializable");
-      executeSql("lock table " + config.changesetLockTableName() + " write");
+      try {
+        con.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+        //executeSql("set autocommit false");
+        //executeSql("start transaction read write, isolation level serializable");
+        executeSql("lock table " + config.changesetLockTableName() + " read");
+      } catch (SQLException e) {
+        e.printStackTrace();
+        //System.err.println("-------------------> " + e.getMessage());
+        return false;
+      }
       int locked = getLockedField();
       if (locked != 0) return false;
       executeSql("insert into " + config.changesetLockTableName() + " values(1)");
@@ -86,11 +97,48 @@ public class ChangeApplyer {
     return true;
   }
   
-  private void prepareChangelogTables() throws SQLException, Exception {
+  private void prepareChangelogTables() throws Exception {
     if (DbUtil.hasTable(con, config.changesetTableName())) return;
+    if (DbUtil.hasTable(con, config.changesetLockTableName())) return;
     
-    createChangesetTable();
-    createChangesetLockTable();
+    {
+      PreparedStatement ps = con.prepareStatement("select count(1) from "
+          + config.changesetLockTableName());
+      try {
+        ResultSet rs = ps.executeQuery();
+        try {
+          rs.next();
+          if (rs.getInt(1) > 0) return;
+        } finally {
+          rs.close();
+        }
+      } finally {
+        ps.close();
+      }
+    }
+    
+    try {
+      createChangesetTable();
+    } catch (SQLException e) {
+      e.printStackTrace();
+      Thread.sleep(100);
+      System.out.println("------------------------- hi");
+      prepareChangelogTables();
+      return;
+    }
+    
+    con.setAutoCommit(true);
+    try {
+      
+      con.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
+      executeSql("lock table " + config.changesetTableName() + " read");
+      
+      createChangesetLockTable();
+    } finally {
+      executeSql("commit");
+      con.setAutoCommit(false);
+    }
+    
   }
   
   private void createChangesetLockTable() throws SQLException {
