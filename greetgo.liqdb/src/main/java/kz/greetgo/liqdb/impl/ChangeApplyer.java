@@ -124,11 +124,12 @@ public class ChangeApplyer {
     StringBuilder sql = new StringBuilder();
     sql.append("create table ").append(config.changesetTableName()).append(" ( ");
     sql.append("  executedAt ").append(timeType).append(" default current_timestamp not null,");
-    sql.append("  author ").append(authorType).append(" not null,");
+    sql.append("  grp ").append(idType).append(" not null,");
     sql.append("  id ").append(idType).append(" not null,");
+    sql.append("  author ").append(authorType).append(" not null,");
     sql.append("  md5sum ").append(md5sumType).append(",");
     sql.append("  ");
-    sql.append("  primary key(author, id)");
+    sql.append("  primary key(grp, id, author)");
     sql.append(")");
     
     executeSql(sql);
@@ -136,13 +137,14 @@ public class ChangeApplyer {
   
   private void saveChangelogExecution(Changelog changelog) throws SQLException {
     String sql = "insert into " + config.changesetTableName()
-        + " (author, id, md5sum) values (?, ?, ?)";
+        + " (grp, id, author, md5sum) values (?, ?, ?, ?)";
     
     PreparedStatement ps = con.prepareStatement(sql);
     try {
-      ps.setString(1, changelog.author());
+      ps.setString(1, changelog.group());
       ps.setString(2, changelog.id());
-      ps.setString(3, changelog.md5sum());
+      ps.setString(3, changelog.author());
+      ps.setString(4, changelog.md5sum());
       ps.executeUpdate();
     } finally {
       ps.close();
@@ -151,12 +153,13 @@ public class ChangeApplyer {
   
   private boolean isExecuted(Changelog changelog) throws SQLException {
     String sql = "select count(1) from " + config.changesetTableName()
-        + " where id = ? and author = ?";
+        + " where grp = ? and id = ? and author = ?";
     
     PreparedStatement ps = con.prepareStatement(sql);
     try {
-      ps.setString(1, changelog.id());
-      ps.setString(2, changelog.author());
+      ps.setString(1, changelog.group());
+      ps.setString(2, changelog.id());
+      ps.setString(3, changelog.author());
       ResultSet rs = ps.executeQuery();
       try {
         rs.next();
@@ -171,12 +174,13 @@ public class ChangeApplyer {
   
   private void md5sumIsOk(Changelog changelog) throws SQLException {
     String sql = "select md5sum from " + config.changesetTableName()
-        + " where id = ? and author = ?";
+        + " where grp = ? and id = ? and author = ?";
     
     PreparedStatement ps = con.prepareStatement(sql);
     try {
-      ps.setString(1, changelog.id());
-      ps.setString(2, changelog.author());
+      ps.setString(1, changelog.group());
+      ps.setString(2, changelog.id());
+      ps.setString(3, changelog.author());
       ResultSet rs = ps.executeQuery();
       try {
         if (!rs.next()) throw new UnknownError();

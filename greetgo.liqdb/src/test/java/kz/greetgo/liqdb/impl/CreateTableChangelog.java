@@ -5,17 +5,18 @@ import java.sql.PreparedStatement;
 
 import kz.greetgo.liqdb.Changelog;
 
-public class CreateTableChange implements Changelog {
+public class CreateTableChangelog implements Changelog {
   
   private final String tableName;
   
-  public CreateTableChange(String tableName) {
+  public CreateTableChangelog(String tableName) {
     this.tableName = tableName;
   }
   
   public String md5sum;
   public String author;
   public String id;
+  public String group;
   
   @Override
   public String md5sum() {
@@ -33,6 +34,11 @@ public class CreateTableChange implements Changelog {
   }
   
   @Override
+  public String group() {
+    return group;
+  }
+  
+  @Override
   public void apply(Connection con) throws Exception {
     PreparedStatement ps = con.prepareStatement("create table " + tableName + " (id int)");
     ps.execute();
@@ -41,8 +47,8 @@ public class CreateTableChange implements Changelog {
   
   @Override
   public String identityInfo() {
-    return getClass().getSimpleName() + ": tableName = " + tableName + ", id = " + id
-        + ", author = " + author;
+    return getClass().getSimpleName() + ": tableName = " + tableName + ", group:id = " + group
+        + ":" + id + ", author = " + author;
   }
   
 }

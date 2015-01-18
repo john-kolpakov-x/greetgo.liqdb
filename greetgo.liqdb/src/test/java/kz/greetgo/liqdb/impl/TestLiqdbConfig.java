@@ -16,12 +16,16 @@ public class TestLiqdbConfig implements LiqdbConfig {
   
   @Override
   public int changesetAuthorTypeLen() {
-    return 50;
+    return 500;
   }
   
   @Override
   public int changesetIdTypeLen() {
-    return 20;
+    return 200;
   }
   
+  @Override
+  public int changesetGroupTypeLen() {
+    return 200;
+  }
 }

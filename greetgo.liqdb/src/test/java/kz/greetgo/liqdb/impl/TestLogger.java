@@ -19,14 +19,13 @@ public class TestLogger implements Logger {
   
   @Override
   public void executionTime(long millisPeriod, Changelog change) {
-    list.add(pr("executionTime: millis " + millisPeriod + ", author " + change.author() + ", id "
-        + change.id()));
+    list.add(pr("executionTime: millis " + millisPeriod + ", changelog " + change.identityInfo()));
   }
   
   @Override
   public void executionError(long millisPeriod, Changelog change, Throwable error) {
-    list.add(pr("executionError: millis " + millisPeriod + ", author " + change.author() + ", id "
-        + change.id() + ", errorClass " + error.getClass().getSimpleName() + ", errorMessage "
+    list.add(pr("executionError: millis " + millisPeriod + ", changelog " + change.identityInfo()
+        + ", errorClass " + error.getClass().getSimpleName() + ", errorMessage "
         + error.getMessage()));
     
   }

@@ -6,8 +6,10 @@ public interface LiqdbConfig {
   
   String changesetLockTableName();
   
-  int changesetAuthorTypeLen();
+  int changesetGroupTypeLen();
   
   int changesetIdTypeLen();
+  
+  int changesetAuthorTypeLen();
   
 }

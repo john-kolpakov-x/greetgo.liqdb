@@ -22,10 +22,7 @@ public class ChangeApplyerTest extends ConnectionSourcer {
     
     String tableName = "test_fdsafdsafdsaf";
     
-    CreateTableChange c = new CreateTableChange(tableName);
-    c.author = "авыа";
-    c.id = "dsпапa";
-    c.md5sum = "dsaавыаывdsd";
+    CreateTableChangelog c = createTableChangelog(tableName);
     
     ca.applyChangelog(c);
     
@@ -34,20 +31,21 @@ public class ChangeApplyerTest extends ConnectionSourcer {
     assertThat(DbUtil.hasTable(con, tableName)).isTrue();
   }
   
+  private CreateTableChangelog createTableChangelog(String tableName) {
+    CreateTableChangelog c = new CreateTableChangelog(tableName);
+    c.author = tableName + "_author";
+    c.id = tableName + "_id";
+    c.group = tableName + "_group";
+    c.md5sum = tableName + "_md5sum";
+    return c;
+  }
+  
   @Test(dataProvider = "connectionDataProvider", expectedExceptions = LeftMd5sum.class)
   public void applyChangelog_err(Connection con) throws Exception {
-    
     ChangeApplyer ca = new ChangeApplyer(con, logger, config);
-    
-    CreateTableChange c = new CreateTableChange("test_001");
-    c.author = "asd";
-    c.id = "dsa";
-    c.md5sum = "dsadsd";
-    
+    CreateTableChangelog c = createTableChangelog("test_001");
     ca.applyChangelog(c);
-    
     c.md5sum = "other";
-    
     ca.applyChangelog(c);
   }
   
@@ -56,5 +54,10 @@ public class ChangeApplyerTest extends ConnectionSourcer {
     for (String m : logger.list) {
       System.out.println(m);
     }
+  }
+  
+  @Test(dataProvider = "connectionDataProvider")
+  public void lockingApplyChangelogList_ok(Connection con) throws Exception {
+    
   }
 }

@@ -5,9 +5,11 @@ import java.sql.Connection;
 public interface Changelog {
   String md5sum();
   
-  String author();
+  String group();
   
   String id();
+  
+  String author();
   
   String identityInfo();
   
