@@ -18,4 +18,6 @@ dependencies {
   compile 'org.easytesting:fest-assert:1.4'
   
   testCompile 'org.hsqldb:hsqldb:2.3.2'
+  
+  testCompile 'postgresql:postgresql:9.1-901-1.jdbc4'
 }
