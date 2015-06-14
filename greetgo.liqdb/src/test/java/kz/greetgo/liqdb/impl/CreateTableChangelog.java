@@ -14,9 +14,7 @@ public class CreateTableChangelog implements Changelog {
   }
   
   public String md5sum;
-  public String author;
-  public String id;
-  public String group;
+  public String uniqueId;
   
   @Override
   public String md5sum() {
@@ -24,18 +22,8 @@ public class CreateTableChangelog implements Changelog {
   }
   
   @Override
-  public String author() {
-    return author;
-  }
-  
-  @Override
-  public String id() {
-    return id;
-  }
-  
-  @Override
-  public String group() {
-    return group;
+  public String uniqueId() {
+    return uniqueId;
   }
   
   @Override
@@ -43,12 +31,6 @@ public class CreateTableChangelog implements Changelog {
     PreparedStatement ps = con.prepareStatement("create table " + tableName + " (id int)");
     ps.execute();
     ps.close();
-  }
-  
-  @Override
-  public String identityInfo() {
-    return getClass().getSimpleName() + ": tableName = " + tableName + ", group:id = " + group
-        + ":" + id + ", author = " + author;
   }
   
 }

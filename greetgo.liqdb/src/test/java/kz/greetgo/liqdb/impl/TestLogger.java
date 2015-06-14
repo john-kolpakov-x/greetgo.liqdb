@@ -21,14 +21,14 @@ public class TestLogger implements Logger {
   
   @Override
   public void changelogApplyOk(long millisPeriod, Changelog change) {
-    list.add(pr("changelogApplyOk: millis " + millisPeriod + ", changelog " + change.identityInfo()));
+    list.add(pr("changelogApplyOk: millis " + millisPeriod + ", uniqueId " + change.uniqueId()));
   }
   
   @Override
   public void changelogApplyError(long millisPeriod, Changelog change, Throwable error) {
-    list.add(pr("changelogApplyError: millis " + millisPeriod + ", changelog "
-        + change.identityInfo() + ", errorClass " + error.getClass().getSimpleName()
-        + ", errorMessage " + error.getMessage()));
+    list.add(pr("changelogApplyError: millis " + millisPeriod + ", uniqueId " + change.uniqueId()
+        + ", errorClass " + error.getClass().getSimpleName() + ", errorMessage "
+        + error.getMessage()));
     
   }
   

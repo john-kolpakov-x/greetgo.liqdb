@@ -86,7 +86,10 @@ public class ConnectionSourcer {
   
   protected static void exec(Connection con, String sql) throws SQLException {
     PreparedStatement ps = con.prepareStatement(sql);
-    ps.execute();
-    ps.close();
+    try {
+      ps.execute();
+    } finally {
+      ps.close();
+    }
   }
 }
