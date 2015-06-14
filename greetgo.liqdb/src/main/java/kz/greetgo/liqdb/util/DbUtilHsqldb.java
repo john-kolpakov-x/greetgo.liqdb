@@ -37,6 +37,7 @@ public class DbUtilHsqldb {
     sql.append("  where table_type = 'BASE TABLE'");
     sql.append("  and table_schema = 'PUBLIC'");
     sql.append("  and table_name = ?");
+    
     PreparedStatement ps = con.prepareStatement(sql.toString());
     ps.setString(1, tableName.toUpperCase());
     try {

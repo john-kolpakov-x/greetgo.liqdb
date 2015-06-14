@@ -9,8 +9,8 @@ public class LeftMd5sum extends RuntimeException {
   public final Changelog changelog;
   
   public LeftMd5sum(String md5sumFromDB, String md5sumFromChangelog, Changelog changelog) {
-    super("LeftMd5sum in db = " + md5sumFromDB + ", in changelog = " + md5sumFromChangelog
-        + ", chnagelog " + changelog.uniqueId());
+    super("LeftMd5sum in db = " + md5sumFromDB + ", in md5sum = " + md5sumFromChangelog
+        + ", uniqueId " + changelog.uniqueId());
     this.md5sumFromDB = md5sumFromDB;
     this.md5sumFromChangelog = md5sumFromChangelog;
     this.changelog = changelog;
